@@ -88,3 +88,4 @@ src/
 | Initial | Template created with Next.js 16 base setup |
 | Current | Built full Exotic Q&A platform with auth, DB, themes, AI |
 | Latest | Switched database from SQLite to Supabase PostgreSQL |
+| Latest | Added .env.local with Supabase connection string; fixed runtime error in auth pages by adding try/catch and using window.location.href for post-login/registration redirect |

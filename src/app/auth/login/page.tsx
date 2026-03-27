@@ -19,15 +19,19 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const result = await loginAction(formData);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await loginAction(formData);
 
-    if (result.error) {
-      setError(result.error);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      } else {
+        window.location.href = "/";
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-    } else {
-      router.push("/");
-      router.refresh();
     }
   }
 
