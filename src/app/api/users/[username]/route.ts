@@ -9,39 +9,37 @@ export async function GET(
 ) {
   const { username } = await params;
 
-  const user = await db
+  const userResult = await db
     .select()
     .from(users)
     .where(eq(users.username, username))
-    .get();
+    .limit(1);
 
-  if (!user) {
+  if (userResult.length === 0) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const questionCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const user = userResult[0];
+
+  const questionCountResult = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(questions)
-    .where(eq(questions.recipientId, user.id))
-    .get();
+    .where(eq(questions.recipientId, user.id));
 
-  const answerCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const answerCountResult = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(answers)
-    .where(eq(answers.authorId, user.id))
-    .get();
+    .where(eq(answers.authorId, user.id));
 
-  const followerCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const followerCountResult = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(follows)
-    .where(eq(follows.followingId, user.id))
-    .get();
+    .where(eq(follows.followingId, user.id));
 
-  const followingCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const followingCountResult = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(follows)
-    .where(eq(follows.followerId, user.id))
-    .get();
+    .where(eq(follows.followerId, user.id));
 
   return NextResponse.json({
     user: {
@@ -53,10 +51,10 @@ export async function GET(
       createdAt: user.createdAt,
     },
     stats: {
-      questions: questionCount?.count || 0,
-      answers: answerCount?.count || 0,
-      followers: followerCount?.count || 0,
-      following: followingCount?.count || 0,
+      questions: questionCountResult[0]?.count || 0,
+      answers: answerCountResult[0]?.count || 0,
+      followers: followerCountResult[0]?.count || 0,
+      following: followingCountResult[0]?.count || 0,
     },
   });
 }

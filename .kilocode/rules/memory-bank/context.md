@@ -7,7 +7,7 @@
 ## Recently Completed
 
 - [x] Full Next.js 16 App Router application "Exotic"
-- [x] SQLite database via Drizzle ORM (users, questions, answers, likes, follows)
+- [x] PostgreSQL database via Supabase + Drizzle ORM (users, questions, answers, likes, follows)
 - [x] Cookie-based authentication (register, login, logout, sessions)
 - [x] Dark (#000000) and Light (#ffffff) theme system with gold (#D4AF37) accents
 - [x] 18 custom animated SVG icon components
@@ -70,9 +70,9 @@ src/
 │       ├── Card.tsx, Avatar.tsx, Badge.tsx
 │       ├── Toggle.tsx, Spinner.tsx
 ├── db/
-│   ├── schema.ts                # 5 tables
-│   ├── index.ts                 # DB client
-│   ├── migrate.ts               # Migration runner
+│   ├── schema.ts                # 5 PostgreSQL tables
+│   ├── index.ts                 # postgres.js + Drizzle client
+│   ├── migrate.ts               # Drizzle migrator
 │   └── migrations/              # Generated SQL
 └── lib/
     ├── utils.ts                 # cn, formatDate, truncate
@@ -87,3 +87,4 @@ src/
 |------|---------|
 | Initial | Template created with Next.js 16 base setup |
 | Current | Built full Exotic Q&A platform with auth, DB, themes, AI |
+| Latest | Switched database from SQLite to Supabase PostgreSQL |

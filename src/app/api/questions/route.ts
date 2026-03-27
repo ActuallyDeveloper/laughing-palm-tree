@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { questions, answers, users } from "@/db/schema";
-import { desc, eq, sql, and } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export async function GET() {
   const feed = await db
@@ -14,8 +14,7 @@ export async function GET() {
     .innerJoin(questions, eq(answers.questionId, questions.id))
     .innerJoin(users, eq(answers.authorId, users.id))
     .orderBy(desc(answers.createdAt))
-    .limit(50)
-    .all();
+    .limit(50);
 
   const feedWithLikes = feed.map((item) => ({
     ...item,

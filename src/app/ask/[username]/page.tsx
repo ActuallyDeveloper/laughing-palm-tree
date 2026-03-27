@@ -9,9 +9,11 @@ import { notFound } from "next/navigation";
 export default async function AskPage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const session = await getSession();
-  const recipient = await db.select().from(users).where(eq(users.username, username)).get();
+  const recipientResult = await db.select().from(users).where(eq(users.username, username)).limit(1);
 
-  if (!recipient) notFound();
+  if (recipientResult.length === 0) notFound();
+
+  const recipient = recipientResult[0];
 
   return (
     <AppShell username={session?.username}>

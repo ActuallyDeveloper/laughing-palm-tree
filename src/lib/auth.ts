@@ -29,8 +29,8 @@ export async function getSession() {
   const userId = parseInt(userIdStr, 10);
   if (isNaN(userId)) return null;
 
-  const user = await db.select().from(users).where(eq(users.id, userId)).get();
-  return user || null;
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return result.length > 0 ? result[0] : null;
 }
 
 export async function destroySession() {

@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { users, questions, answers, likes, follows } from "@/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, notExists } from "drizzle-orm";
 import { hashPassword, verifyPassword, createSession, destroySession, getSession } from "@/lib/auth";
 
 export async function registerAction(formData: FormData) {
@@ -15,22 +15,21 @@ export async function registerAction(formData: FormData) {
     return { error: "All fields are required" };
   }
 
-  const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
-  if (existingUser) {
+  const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (existingUser.length > 0) {
     return { error: "Email already registered" };
   }
 
-  const existingUsername = await db.select().from(users).where(eq(users.username, username)).get();
-  if (existingUsername) {
+  const existingUsername = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  if (existingUsername.length > 0) {
     return { error: "Username already taken" };
   }
 
   const passwordHash = await hashPassword(password);
-  const user = await db
+  const [user] = await db
     .insert(users)
     .values({ username, displayName, email, passwordHash })
-    .returning()
-    .get();
+    .returning();
 
   await createSession(user.id);
   return { success: true, userId: user.id };
@@ -44,11 +43,12 @@ export async function loginAction(formData: FormData) {
     return { error: "Email and password are required" };
   }
 
-  const user = await db.select().from(users).where(eq(users.email, email)).get();
-  if (!user) {
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (result.length === 0) {
     return { error: "Invalid credentials" };
   }
 
+  const user = result[0];
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
     return { error: "Invalid credentials" };
@@ -73,16 +73,17 @@ export async function askQuestionAction(formData: FormData) {
     return { error: "Question content and recipient are required" };
   }
 
-  const recipient = await db
+  const recipientResult = await db
     .select()
     .from(users)
     .where(eq(users.username, recipientUsername))
-    .get();
+    .limit(1);
 
-  if (!recipient) {
+  if (recipientResult.length === 0) {
     return { error: "User not found" };
   }
 
+  const recipient = recipientResult[0];
   if (!recipient.allowAnonymous && isAnonymous) {
     return { error: "This user does not accept anonymous questions" };
   }
@@ -108,8 +109,10 @@ export async function answerQuestionAction(formData: FormData) {
     return { error: "Answer content and question ID are required" };
   }
 
-  const question = await db.select().from(questions).where(eq(questions.id, questionId)).get();
-  if (!question) return { error: "Question not found" };
+  const questionResult = await db.select().from(questions).where(eq(questions.id, questionId)).limit(1);
+  if (questionResult.length === 0) return { error: "Question not found" };
+
+  const question = questionResult[0];
   if (question.recipientId !== session.id) return { error: "Not your question to answer" };
 
   await db.insert(answers).values({
@@ -129,10 +132,10 @@ export async function likeAnswerAction(answerId: number) {
     .select()
     .from(likes)
     .where(and(eq(likes.userId, session.id), eq(likes.answerId, answerId)))
-    .get();
+    .limit(1);
 
-  if (existing) {
-    await db.delete(likes).where(eq(likes.id, existing.id));
+  if (existing.length > 0) {
+    await db.delete(likes).where(eq(likes.id, existing[0].id));
     return { success: true, action: "unliked" };
   }
 
@@ -149,10 +152,10 @@ export async function followUserAction(userId: number) {
     .select()
     .from(follows)
     .where(and(eq(follows.followerId, session.id), eq(follows.followingId, userId)))
-    .get();
+    .limit(1);
 
-  if (existing) {
-    await db.delete(follows).where(eq(follows.id, existing.id));
+  if (existing.length > 0) {
+    await db.delete(follows).where(eq(follows.id, existing[0].id));
     return { success: true, action: "unfollowed" };
   }
 
@@ -192,16 +195,14 @@ export async function getFeed() {
     .innerJoin(questions, eq(answers.questionId, questions.id))
     .innerJoin(users, eq(answers.authorId, users.id))
     .orderBy(desc(answers.createdAt))
-    .limit(50)
-    .all();
+    .limit(50);
 
   const feedWithLikes = await Promise.all(
     feed.map(async (item) => {
-      const likeCount = await db
-        .select({ count: sql<number>`count(*)` })
+      const likeCountResult = await db
+        .select({ count: sql<number>`count(*)::int` })
         .from(likes)
-        .where(eq(likes.answerId, item.answer.id))
-        .get();
+        .where(eq(likes.answerId, item.answer.id));
 
       let isLiked = false;
       if (session) {
@@ -209,11 +210,11 @@ export async function getFeed() {
           .select()
           .from(likes)
           .where(and(eq(likes.userId, session.id), eq(likes.answerId, item.answer.id)))
-          .get();
-        isLiked = !!liked;
+          .limit(1);
+        isLiked = liked.length > 0;
       }
 
-      return { ...item, likeCount: likeCount?.count || 0, isLiked };
+      return { ...item, likeCount: likeCountResult[0]?.count || 0, isLiked };
     })
   );
 
@@ -221,8 +222,10 @@ export async function getFeed() {
 }
 
 export async function getUserProfile(username: string) {
-  const user = await db.select().from(users).where(eq(users.username, username)).get();
-  if (!user) return null;
+  const userResult = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  if (userResult.length === 0) return null;
+
+  const user = userResult[0];
 
   const userQuestions = await db
     .select({
@@ -233,26 +236,23 @@ export async function getUserProfile(username: string) {
     .leftJoin(answers, eq(questions.id, answers.questionId))
     .where(eq(questions.recipientId, user.id))
     .orderBy(desc(questions.createdAt))
-    .limit(50)
-    .all();
+    .limit(50);
 
-  const followerCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const followerCountResult = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(follows)
-    .where(eq(follows.followingId, user.id))
-    .get();
+    .where(eq(follows.followingId, user.id));
 
-  const followingCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const followingCountResult = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(follows)
-    .where(eq(follows.followerId, user.id))
-    .get();
+    .where(eq(follows.followerId, user.id));
 
   return {
     user,
     questions: userQuestions,
-    followerCount: followerCount?.count || 0,
-    followingCount: followingCount?.count || 0,
+    followerCount: followerCountResult[0]?.count || 0,
+    followingCount: followingCountResult[0]?.count || 0,
   };
 }
 
@@ -270,11 +270,12 @@ export async function getUnansweredQuestions() {
     .where(
       and(
         eq(questions.recipientId, session.id),
-        sql`NOT EXISTS (SELECT 1 FROM answers WHERE answers.question_id = questions.id)`
+        notExists(
+          db.select().from(answers).where(eq(answers.questionId, questions.id))
+        )
       )
     )
-    .orderBy(desc(questions.createdAt))
-    .all();
+    .orderBy(desc(questions.createdAt));
 
   return unanswered;
 }
@@ -283,12 +284,11 @@ export async function getExploreUsers() {
   const topUsers = await db
     .select({
       user: users,
-      questionCount: sql<number>`(SELECT COUNT(*) FROM questions WHERE questions.recipient_id = users.id)`,
+      questionCount: sql<number>`(SELECT COUNT(*)::int FROM questions WHERE questions.recipient_id = users.id)`,
     })
     .from(users)
     .orderBy(desc(sql`questionCount`))
-    .limit(20)
-    .all();
+    .limit(20);
 
   return topUsers;
 }

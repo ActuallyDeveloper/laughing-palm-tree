@@ -9,10 +9,11 @@
 | TypeScript   | 5.9.x   | Type-safe JavaScript            |
 | Tailwind CSS | 4.x     | Utility-first CSS               |
 | Bun          | Latest  | Package manager & runtime       |
-| Drizzle ORM  | 0.45.x  | SQLite ORM                      |
-| next-themes  | 0.4.x   | Dark/light theme management     |
-| bcryptjs     | 3.x     | Password hashing                |
-| uuid         | 13.x    | Session token generation        |
+| Drizzle ORM  | 0.45.x  | PostgreSQL ORM                   |
+| postgres     | 3.x     | PostgreSQL driver (postgres.js)   |
+| next-themes  | 0.4.x   | Dark/light theme management      |
+| bcryptjs     | 3.x     | Password hashing                 |
+| uuid         | 13.x    | Session token generation         |
 
 ## Development Commands
 
@@ -33,10 +34,13 @@ Set in `.env.local`:
 
 | Variable | Purpose |
 |----------|---------|
+| `DATABASE_URL` | Supabase PostgreSQL connection string |
 | `OPENROUTER_API_KEY` | OpenRouter API key for AI suggestions |
 | `NEXT_PUBLIC_APP_URL` | App URL for OpenRouter referer header |
 
-## Database Schema
+## Database
+
+PostgreSQL via Supabase, using `postgres` (postgres.js) driver with Drizzle ORM.
 
 5 tables: `users`, `questions`, `answers`, `likes`, `follows`
 
