@@ -1,44 +1,32 @@
-# Product Context: Next.js Starter Template
+# Product Context: Exotic
 
-## Why This Template Exists
+## What is Exotic
 
-Starting a new Next.js project involves boilerplate setup, configuration decisions, and establishing patterns. This template provides a clean, opinionated starting point that eliminates setup friction and establishes best practices from the start. It's optimized for AI-assisted development, where an AI can quickly extend the template based on user requirements.
+Exotic is an AI-powered anonymous/unanonymous Q&A social platform, similar to Tellonym, CuriousCat, and Ask.fm. Users create profiles, receive questions (anonymously or from named users), and answer them publicly. AI-powered answer suggestions are available via OpenRouter.
 
 ## Problems It Solves
 
-1. **Setup Time**: Eliminates boilerplate configuration (TypeScript, Tailwind, ESLint)
-2. **Decision Fatigue**: Pre-made choices for tooling and patterns
-3. **AI Context**: Memory bank provides persistent context for AI assistants
-4. **Extensibility**: Recipe system for adding common features
-5. **Consistency**: Standardized project structure and conventions
+1. **Anonymous Expression**: Users can ask questions without revealing identity
+2. **Social Discovery**: Explore page helps users find interesting people
+3. **AI-Assisted Responses**: OpenRouter AI integration suggests answers
+4. **Modern UX**: Beautiful dark/light themes with gold accents
 
-## How It Should Work (User Flow)
+## User Flow
 
-1. User starts with this template
-2. User describes what they want to build to AI assistant
-3. AI adds pages, components, and features as needed
-4. AI uses recipes for common additions (database, auth)
-5. User previews changes via hot reload
-6. Iterate until satisfied
-7. Deploy
+1. **Landing**: Unauthenticated users see a marketing page with CTA to register
+2. **Register/Login**: Create account with email, username, display name, password
+3. **Feed**: Authenticated users see a feed of answered questions with likes
+4. **Explore**: Discover users, see question counts, send questions
+5. **Ask**: Visit `/ask/[username]` to send anonymous or named questions
+6. **Inbox**: View unanswered questions, reply with AI assistance
+7. **Profile**: View user profiles, follow, see Q&A history
+8. **Settings**: Edit profile, toggle anonymous questions, switch theme
 
-## Key User Experience Goals
+## Key UX Goals
 
-- **Zero to Feature Fast**: Get building immediately, no setup required
-- **AI-Friendly**: Memory bank and recipes make AI assistance effective
-- **Flexible Foundation**: Can become any type of application
-- **Best Practices Built-In**: TypeScript strict mode, ESLint, clean structure
-
-## What This Template Provides
-
-1. **Clean App Structure**: Single page ready for expansion
-2. **Type Safety**: Full TypeScript setup with strict mode
-3. **Modern Styling**: Tailwind CSS 4 ready to use
-4. **Code Quality**: ESLint configured
-5. **Extensibility**: Recipe system for common features
-
-## Integration Points
-
-- **Database**: Use add-database recipe for Drizzle + SQLite
-- **Styling**: Tailwind CSS pre-configured
-- **AI Assistance**: Memory bank for context persistence
+- **Dark (#000000) and Light (#ffffff) modes** with gold (#D4AF37) accents
+- **Responsive**: Desktop sidebar, tablet adapt, mobile bottom nav
+- **Animated SVG icons** for premium feel
+- **Glass-effect** headers/navbars
+- **Smooth transitions** between theme changes
+- **Staggered animations** on cards/lists

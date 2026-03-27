@@ -1,48 +1,49 @@
-# Project Brief: Next.js Starter Template
+# Project Brief: Exotic
 
 ## Purpose
 
-This is a minimal Next.js starter template designed for AI-assisted development. It provides a clean foundation that can be extended to build any type of web application through interaction with an AI assistant.
+Exotic is an AI-powered anonymous/unanonymous Q&A social platform. Users create profiles, receive questions from others (anonymously or openly), and answer them on a public feed. Think Tellonym, CuriousCat, or Ask.fm with modern design and AI assistance.
 
 ## Target Users
 
-- Developers wanting a clean Next.js starting point
-- Users building applications through AI-assisted coding
-- Teams needing a standardized, modern Next.js setup
+- Anyone who wants to receive and answer questions publicly
+- Users who want to ask questions anonymously
+- People looking for social Q&A interaction
 
-## Core Use Case
+## Core Features
 
-Users describe what they want to build to an AI assistant, which then expands this template by:
+### Must Have
+- User registration and authentication
+- Profile pages with Q&A history
+- Anonymous and named question sending
+- Question inbox and answering
+- Public feed of answered questions
+- Like system for answers
+- Follow system for users
+- Dark/light theme with gold accents
+- Responsive design (desktop, tablet, mobile)
+- AI-powered answer suggestions via OpenRouter
 
-1. Adding components and pages as needed
-2. Installing additional dependencies
-3. Setting up databases, authentication, etc. using recipes
-4. Customizing styling and branding
+### Nice to Have
+- Real-time notifications
+- Image/avatar uploads
+- Question categories/tags
+- Share links with QR codes
 
 ## Key Requirements
 
-### Must Have
-
-- Modern Next.js 16 setup with App Router
-- TypeScript for type safety
-- Tailwind CSS 4 for styling
-- ESLint for code quality
-- Clean, minimal starting structure
-- Bun as package manager
-
-### Nice to Have
-
-- Recipe system for common additions (database, auth)
-- Memory bank for AI context persistence
-- Clear development guidelines
+- Package manager: Bun
+- Framework: Next.js 16 + React 19 + Tailwind CSS 4
+- Database: SQLite via Drizzle ORM
+- Auth: Cookie-based session management
+- AI: OpenRouter API integration
+- Themes: #000000 dark, #ffffff light, #D4AF37 gold accents
 
 ## Success Metrics
 
-- Clean, zero-error TypeScript setup
-- Passing lint and type checks
-
-## Constraints
-
-- Minimal dependencies by default
-- Framework: Next.js 16 + React 19 + Tailwind CSS 4
-- Package manager: Bun
+- Clean typecheck and lint passes
+- Responsive across all breakpoints
+- Smooth theme transitions
+- Functional auth flow
+- Working Q&A with anonymous support
+- AI suggestions return useful text

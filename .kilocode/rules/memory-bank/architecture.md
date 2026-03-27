@@ -1,120 +1,48 @@
-# System Patterns: Next.js Starter Template
+# System Patterns: Exotic
 
 ## Architecture Overview
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx          # Root layout + metadata
-│   ├── page.tsx            # Home page
-│   ├── globals.css         # Tailwind imports + global styles
-│   └── favicon.ico         # Site icon
-└── (expand as needed)
-    ├── components/         # React components (add when needed)
-    ├── lib/                # Utilities and helpers (add when needed)
-    └── db/                 # Database files (add via recipe)
+├── app/                    # Next.js App Router (pages + API)
+├── components/             # React components
+│   ├── ui/                 # Reusable UI (Button, Card, Input, etc.)
+│   ├── layout/             # Layout (AppShell, Sidebar, Header, MobileNav)
+│   └── *.tsx               # Feature components (Feed, Profile, etc.)
+├── db/                     # Database (Drizzle ORM + SQLite)
+├── lib/                    # Utilities (auth, ai, actions, utils)
 ```
 
 ## Key Design Patterns
 
-### 1. App Router Pattern
+### 1. App Router + Server Components
+Pages are Server Components that fetch data, then pass to Client Components for interactivity.
 
-Uses Next.js App Router with file-based routing:
-```
-src/app/
-├── page.tsx           # Route: /
-├── about/page.tsx     # Route: /about
-├── blog/
-│   ├── page.tsx       # Route: /blog
-│   └── [slug]/page.tsx # Route: /blog/:slug
-└── api/
-    └── route.ts       # API Route: /api
-```
+### 2. Auth Pattern
+Cookie-based sessions managed in `src/lib/auth.ts`. `getSession()` reads cookies, returns user or null.
 
-### 2. Component Organization Pattern (When Expanding)
+### 3. Server Actions
+All mutations (register, login, ask, answer, like, follow, update profile) are in `src/lib/actions.ts` as `"use server"` functions.
 
-```
-src/components/
-├── ui/                # Reusable UI components (Button, Card, etc.)
-├── layout/            # Layout components (Header, Footer)
-├── sections/          # Page sections (Hero, Features, etc.)
-└── forms/             # Form components
-```
+### 4. Theme System
+`next-themes` manages dark/light state. CSS custom properties in `globals.css` define colors. `ThemeProvider` wraps the app in `layout.tsx`.
 
-### 3. Server Components by Default
+### 5. AI Integration
+`src/lib/ai.ts` calls OpenRouter API. Client components call `/api/ai/suggest` POST endpoint.
 
-All components are Server Components unless marked with `"use client"`:
-```tsx
-// Server Component (default) - can fetch data, access DB
-export default function Page() {
-  return <div>Server rendered</div>;
-}
+### 6. Layout Pattern
+`AppShell` composes `Sidebar` (desktop), `Header` (mobile), `MobileNav` (mobile bottom). All pages wrap content in `AppShell`.
 
-// Client Component - for interactivity
-"use client";
-export default function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
-}
-```
-
-### 4. Layout Pattern
-
-Layouts wrap pages and can be nested:
-```tsx
-// src/app/layout.tsx - Root layout
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
-
-// src/app/dashboard/layout.tsx - Nested layout
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex">
-      <Sidebar />
-      <main>{children}</main>
-    </div>
-  );
-}
-```
+## File Naming
+- Components: PascalCase (`FeedContent.tsx`, `AskForm.tsx`)
+- UI primitives: PascalCase (`Button.tsx`, `Card.tsx`)
+- Pages: lowercase (`page.tsx`, `layout.tsx`)
+- Utilities: camelCase (`utils.ts`, `auth.ts`)
+- Directories: kebab-case (`api/`, `auth/`)
 
 ## Styling Conventions
-
-### Tailwind CSS Usage
-- Utility classes directly on elements
-- Component composition for repeated patterns
-- Responsive: `sm:`, `md:`, `lg:`, `xl:`
-
-### Common Patterns
-```tsx
-// Container
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-// Responsive grid
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-// Flexbox centering
-<div className="flex items-center justify-center">
-```
-
-## File Naming Conventions
-
-- Components: PascalCase (`Button.tsx`, `Header.tsx`)
-- Utilities: camelCase (`utils.ts`, `helpers.ts`)
-- Pages/Routes: lowercase (`page.tsx`, `layout.tsx`)
-- Directories: kebab-case (`api-routes/`) or lowercase (`components/`)
-
-## State Management
-
-For simple needs:
-- `useState` for local component state
-- `useContext` for shared state
-- Server Components for data fetching
-
-For complex needs (add when necessary):
-- Zustand for client state
-- React Query for server state
+- CSS custom properties for theme colors (`var(--bg-primary)`, `var(--text-primary)`)
+- Gold accent classes: `text-gold-500`, `bg-gold-500/10`, `border-gold-500/30`
+- Animation classes: `animate-fade-in`, `animate-slide-up`, `gold-gradient-text`
+- Responsive: `sm:`, `md:`, `lg:` breakpoints
+- Glass effects: `glass-effect` class with `backdrop-filter: blur()`
