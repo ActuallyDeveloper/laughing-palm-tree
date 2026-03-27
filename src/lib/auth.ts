@@ -21,16 +21,21 @@ export async function createSession(userId: number) {
 }
 
 export async function getSession() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get(SESSION_TOKEN);
-  if (!session?.value) return null;
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get(SESSION_TOKEN);
+    if (!session?.value) return null;
 
-  const [userIdStr] = session.value.split(":");
-  const userId = parseInt(userIdStr, 10);
-  if (isNaN(userId)) return null;
+    const [userIdStr] = session.value.split(":");
+    const userId = parseInt(userIdStr, 10);
+    if (isNaN(userId)) return null;
 
-  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-  return result.length > 0 ? result[0] : null;
+    const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    return result.length > 0 ? result[0] : null;
+  } catch (err) {
+    console.error("getSession failed:", err);
+    return null;
+  }
 }
 
 export async function destroySession() {
