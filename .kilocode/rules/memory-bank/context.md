@@ -89,3 +89,4 @@ src/
 | Current | Built full Exotic Q&A platform with auth, DB, themes, AI |
 | Latest | Switched database from SQLite to Supabase PostgreSQL |
 | Latest | Added .env.local with Supabase connection string; fixed runtime error in auth pages by adding try/catch and using window.location.href for post-login/registration redirect |
+| Latest | Fixed all server-side query errors: disabled prepared statements in postgres client for Supabase transaction pooler compatibility; added try/catch to all 11 server actions and 3 API routes |
