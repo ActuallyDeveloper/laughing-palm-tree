@@ -6,66 +6,56 @@ import { eq, desc, and, sql, notExists } from "drizzle-orm";
 import { hashPassword, verifyPassword, createSession, destroySession, getSession } from "@/lib/auth";
 
 export async function registerAction(formData: FormData) {
-  try {
-    const username = formData.get("username") as string;
-    const displayName = formData.get("displayName") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const username = formData.get("username") as string;
+  const displayName = formData.get("displayName") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-    if (!username || !email || !password || !displayName) {
-      return { error: "All fields are required" };
-    }
-
-    const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    if (existingUser.length > 0) {
-      return { error: "Email already registered" };
-    }
-
-    const existingUsername = await db.select().from(users).where(eq(users.username, username)).limit(1);
-    if (existingUsername.length > 0) {
-      return { error: "Username already taken" };
-    }
-
-    const passwordHash = await hashPassword(password);
-    const [user] = await db
-      .insert(users)
-      .values({ username, displayName, email, passwordHash })
-      .returning();
-
-    await createSession(user.id);
-    return { success: true, userId: user.id };
-  } catch (err) {
-    console.error("registerAction failed:", err);
-    return { error: "Something went wrong. Please try again." };
+  if (!username || !email || !password || !displayName) {
+    return { error: "All fields are required" };
   }
+
+  const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (existingUser.length > 0) {
+    return { error: "Email already registered" };
+  }
+
+  const existingUsername = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  if (existingUsername.length > 0) {
+    return { error: "Username already taken" };
+  }
+
+  const passwordHash = await hashPassword(password);
+  const [user] = await db
+    .insert(users)
+    .values({ username, displayName, email, passwordHash })
+    .returning();
+
+  await createSession(user.id);
+  return { success: true, userId: user.id };
 }
 
 export async function loginAction(formData: FormData) {
-  try {
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-    if (!email || !password) {
-      return { error: "Email and password are required" };
-    }
-
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    if (result.length === 0) {
-      return { error: "Invalid credentials" };
-    }
-
-    const user = result[0];
-    const valid = await verifyPassword(password, user.passwordHash);
-    if (!valid) {
-      return { error: "Invalid credentials" };
-    }
-
-    await createSession(user.id);
-    return { success: true, userId: user.id };
-  } catch (err) {
-    console.error("loginAction failed:", err);
-    return { error: "Something went wrong. Please try again." };
+  if (!email || !password) {
+    return { error: "Email and password are required" };
   }
+
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (result.length === 0) {
+    return { error: "Invalid credentials" };
+  }
+
+  const user = result[0];
+  const valid = await verifyPassword(password, user.passwordHash);
+  if (!valid) {
+    return { error: "Invalid credentials" };
+  }
+
+  await createSession(user.id);
+  return { success: true, userId: user.id };
 }
 
 export async function logoutAction() {
